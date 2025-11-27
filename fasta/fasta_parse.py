@@ -6,6 +6,7 @@
 # Do not copy or distribute without permission, all rights reserved.
 
 from utils.debug import *
+import re
 
 class FastaParser:
     """
@@ -55,6 +56,41 @@ class FastaParser:
                     log_debug_info(f"Appending sequence line: {line}")
             if sequence_id is not None:
                 sequences[sequence_id] = ''.join(sequence_lines)
-                log_debug_info(f"Final sequence for ID {sequence_id}: {sequences[sequence_id]}")
-            
-        return sequences
+                log_debug_info(f"Final sequence for ID {sequence_id}: {sequences[sequence_id][:15]}...")
+        
+        # keep parsed sequences on the parser instance so sequence_search can use them
+        self.sequences = sequences
+        return self.sequences
+    
+    def sequence_search(self, query_sequence):
+        """
+        Searches for a specific DNA sequence in the parsed sequences.
+
+        :param query_sequence: The DNA sequence to search for.
+        :return: List of sequence IDs that contain the query sequence.
+        """
+        matching_ids = []
+        for seq_id, sequence in self.sequences.items():
+            if query_sequence in sequence:
+                matching_ids.append(seq_id)
+                log_debug_info(f"Query sequence found in ID: {seq_id}")
+        return matching_ids 
+    
+    def find_sequence_indexes(self, matching_ids, query_sequence):
+        indexes = {}
+        for seq_id in matching_ids:
+            sequence = self.sequences.get(seq_id, "")
+
+            matches = [m.start() for m in re.finditer(re.escape(query_sequence), sequence)]
+
+            if matches:
+                # convert to (start, end) tuples:
+                ranges = [(i, i + len(query_sequence)) for i in matches]
+                count = len(ranges)
+                indexes[seq_id] = {
+                    "count": count,
+                    "ranges": ranges
+                }
+                log_debug_info(f"Indexes for ID {seq_id}: {ranges}")
+
+        return indexes
