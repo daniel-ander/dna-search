@@ -33,8 +33,6 @@ class FastaParser:
         Parses a FASTA file and returns a dictionary with sequence IDs as keys
         and sequences as values.
 
-        :param file_path: Path to the FASTA file
-        :return: Dictionary of sequences
         """
         sequences = {}
 
@@ -49,14 +47,14 @@ class FastaParser:
                         sequences[sequence_id] = ''.join(sequence_lines)
                     id_bound = line.find(' ', 1)
                     sequence_id = line[1:id_bound] if id_bound != -1 else line[1:]  # Remove '>' character, get ID only
-                    log_debug_info(f"Found sequence ID: {sequence_id}")
+                    log_verbose_info(f"Found sequence ID: {sequence_id}")
                     sequence_lines = []
                 else:
                     sequence_lines.append(line)
-                    log_debug_info(f"Appending sequence line: {line}")
+                    log_verbose_info(f"Appending sequence line: {line}")
             if sequence_id is not None:
                 sequences[sequence_id] = ''.join(sequence_lines)
-                log_debug_info(f"Final sequence for ID {sequence_id}: {sequences[sequence_id][:15]}...")
+                log_verbose_info(f"Final sequence for ID {sequence_id}: {sequences[sequence_id][:15]}...")
         
         # keep parsed sequences on the parser instance so sequence_search can use them
         self.sequences = sequences
@@ -65,18 +63,19 @@ class FastaParser:
     def sequence_search(self, query_sequence):
         """
         Searches for a specific DNA sequence in the parsed sequences.
-
-        :param query_sequence: The DNA sequence to search for.
-        :return: List of sequence IDs that contain the query sequence.
         """
         matching_ids = []
         for seq_id, sequence in self.sequences.items():
             if query_sequence in sequence:
                 matching_ids.append(seq_id)
-                log_debug_info(f"Query sequence found in ID: {seq_id}")
+                log_verbose_info(f"Query sequence found in ID: {seq_id}")
         return matching_ids 
     
+    
     def find_sequence_indexes(self, matching_ids, query_sequence):
+        """
+        Finds the start and end indexes of the query sequence in the matching sequences.
+        """
         indexes = {}
         for seq_id in matching_ids:
             sequence = self.sequences.get(seq_id, "")
@@ -91,6 +90,6 @@ class FastaParser:
                     "count": count,
                     "ranges": ranges
                 }
-                log_debug_info(f"Indexes for ID {seq_id}: {ranges}")
+                log_verbose_info(f"Indexes for ID {seq_id}: {ranges}")
 
         return indexes

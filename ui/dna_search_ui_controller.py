@@ -29,9 +29,6 @@ class DNASearchUIController:
     def display_fasta_sequences(self, file_path):
         """
         Loads the contents of the FASTA file into the UI text window
-
-        :param file_path: Path to the FASTA file.
-        :return: Dictionary of sequences.
         """
 
         sequences = {}
@@ -43,8 +40,8 @@ class DNASearchUIController:
 
     def import_fasta(self):
         """
-        Placeholder method for importing a FASTA file.
-        Actual implementation should handle file selection and parsing.
+        Opens a file dialog to import a FASTA file and display its sequences.
+
         """
         file_path = filedialog.askopenfilename(
             title="Select FASTA File",
@@ -56,7 +53,6 @@ class DNASearchUIController:
     def search_dna_sequence(self):
         """
         Searches for the DNA sequence entered in the UI.
-        Currently a placeholder that shows a message box.
         """
         dna_sequence = self.ui.entry.get().strip()
         if not dna_sequence:
